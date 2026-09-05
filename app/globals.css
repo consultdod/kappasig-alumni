@@ -1,0 +1,197 @@
+@import "tailwindcss";
+
+:root {
+  --ks-crimson: #8B1A1A;
+  --ks-crimson-dark: #6B1414;
+  --ks-crimson-light: #A82020;
+  --ks-gold: #C9A84C;
+  --ks-gold-light: #E2C47A;
+  --ks-gold-pale: #F5EDD6;
+  --ks-navy: #1A2744;
+  --ks-navy-light: #243259;
+  --ks-slate: #4A5568;
+  --ks-fog: #F7F6F3;
+  --ks-white: #FFFFFF;
+  --ks-border: #E2D9C8;
+  --ks-text: #1C1917;
+  --ks-text-muted: #6B6560;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  background-color: var(--ks-fog);
+  color: var(--ks-text);
+}
+
+body {
+  min-height: 100vh;
+}
+
+/* Typography scale */
+h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
+h2 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.01em; line-height: 1.3; }
+h3 { font-size: 1.2rem; font-weight: 600; line-height: 1.4; }
+h4 { font-size: 1rem; font-weight: 600; }
+
+p { line-height: 1.7; max-width: 68ch; }
+
+/* Sans labels and UI elements */
+.ui-sans {
+  font-family: 'Inter', 'Helvetica Neue', sans-serif;
+}
+
+/* Crimson accent bar */
+.crimson-bar {
+  border-left: 3px solid var(--ks-crimson);
+  padding-left: 0.75rem;
+}
+
+/* Button styles */
+.btn-primary {
+  background-color: var(--ks-crimson);
+  color: white;
+  padding: 0.6rem 1.4rem;
+  border-radius: 4px;
+  font-family: 'Inter', 'Helvetica Neue', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  text-decoration: none;
+  display: inline-block;
+}
+.btn-primary:hover { background-color: var(--ks-crimson-dark); }
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--ks-crimson);
+  padding: 0.6rem 1.4rem;
+  border-radius: 4px;
+  font-family: 'Inter', 'Helvetica Neue', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1.5px solid var(--ks-crimson);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+  display: inline-block;
+}
+.btn-secondary:hover {
+  background-color: var(--ks-crimson);
+  color: white;
+}
+
+.btn-gold {
+  background-color: var(--ks-gold);
+  color: var(--ks-navy);
+  padding: 0.6rem 1.4rem;
+  border-radius: 4px;
+  font-family: 'Inter', 'Helvetica Neue', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+.btn-gold:hover { background-color: var(--ks-gold-light); }
+
+/* Card */
+.card {
+  background: white;
+  border: 1px solid var(--ks-border);
+  border-radius: 6px;
+  padding: 1.5rem;
+}
+
+/* Form inputs */
+.field-label {
+  font-family: 'Inter', 'Helvetica Neue', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ks-slate);
+  margin-bottom: 0.35rem;
+  display: block;
+  letter-spacing: 0.01em;
+}
+
+.field-input {
+  width: 100%;
+  border: 1.5px solid var(--ks-border);
+  border-radius: 4px;
+  padding: 0.55rem 0.8rem;
+  font-family: 'Inter', 'Helvetica Neue', sans-serif;
+  font-size: 0.9rem;
+  color: var(--ks-text);
+  background: white;
+  transition: border-color 0.15s;
+  outline: none;
+}
+.field-input:focus { border-color: var(--ks-crimson); }
+
+/* Status badge */
+.badge {
+  font-family: 'Inter', 'Helvetica Neue', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  display: inline-block;
+}
+.badge-admin { background: var(--ks-gold-pale); color: var(--ks-crimson-dark); }
+.badge-member { background: #EEF2FF; color: #3730A3; }
+.badge-active { background: #DCFCE7; color: #166534; }
+.badge-inactive { background: #FEE2E2; color: #991B1B; }
+
+/* Sidebar nav */
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 5px;
+  font-family: 'Inter', 'Helvetica Neue', sans-serif;
+  font-size: 0.875rem;
+  color: #CBD5E0;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.nav-link:hover { background: rgba(201,168,76,0.15); color: var(--ks-gold-light); }
+.nav-link.active { background: rgba(201,168,76,0.2); color: var(--ks-gold); font-weight: 600; }
+
+/* Alert / notice */
+.alert-error { background: #FEE2E2; border: 1px solid #FCA5A5; color: #991B1B; padding: 0.75rem 1rem; border-radius: 4px; font-family: 'Inter', sans-serif; font-size: 0.875rem; }
+.alert-success { background: #DCFCE7; border: 1px solid #86EFAC; color: #166534; padding: 0.75rem 1rem; border-radius: 4px; font-family: 'Inter', sans-serif; font-size: 0.875rem; }
+.alert-info { background: var(--ks-gold-pale); border: 1px solid var(--ks-gold); color: var(--ks-crimson-dark); padding: 0.75rem 1rem; border-radius: 4px; font-family: 'Inter', sans-serif; font-size: 0.875rem; }
+
+/* ── Mobile responsive overrides ─────────────────────────── */
+@media (max-width: 640px) {
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.25rem; }
+
+  /* Dashboard grids */
+  .main-content > div > div[style*="grid-template-columns: repeat(3"] {
+    grid-template-columns: 1fr !important;
+  }
+  .main-content > div > div[style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Tables scroll horizontally */
+  .card table { font-size: 0.78rem; }
+  .card td, .card th { padding: 0.5rem 0.6rem !important; }
+}
+
+@media (max-width: 480px) {
+  .btn-primary, .btn-secondary, .btn-gold {
+    padding: 0.55rem 1rem;
+    font-size: 0.825rem;
+  }
+  .card { padding: 1rem; }
+}
