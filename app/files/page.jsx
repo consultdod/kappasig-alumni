@@ -67,11 +67,8 @@ function FilesPage({ member }) {
     setUploadMsg('')
     const allFiles = Array.from(fileList)
 
-    // Accept all files — filter out truly unsupported ones
-    // For files with empty type (common on Windows), trust the extension
     const validFiles = allFiles.filter(f => {
       if (ALLOWED_TYPES.includes(f.type)) return true
-      // Check by extension if type is missing
       const ext = f.name.split('.').pop().toLowerCase()
       return ['pdf','doc','docx','xls','xlsx','txt','jpg','jpeg','png','gif','webp'].includes(ext)
     })
@@ -90,7 +87,6 @@ function FilesPage({ member }) {
         const ext = file.name.split('.').pop().toLowerCase()
         const path = `${member.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`
 
-        // Determine mime type from extension if browser didn't provide it
         const mimeMap = {
           pdf: 'application/pdf',
           doc: 'application/msword',
@@ -108,18 +104,15 @@ function FilesPage({ member }) {
           .upload(path, file, { contentType: mimeType })
 
         if (upErr) {
-          console.error('Storage upload error:', upErr)
           errors.push(`${file.name}: ${upErr.message}`)
           continue
         }
 
-        // Get signed URL since bucket is private
         const { data: signedData, error: signErr } = await supabase.storage
           .from('documents')
           .createSignedUrl(path, 60 * 60 * 24 * 365)
 
         if (signErr) {
-          console.error('Signed URL error:', signErr)
           errors.push(`${file.name}: Could not create download link`)
           continue
         }
@@ -135,14 +128,12 @@ function FilesPage({ member }) {
         })
 
         if (dbErr) {
-          console.error('DB insert error:', dbErr)
           errors.push(`${file.name}: ${dbErr.message}`)
           continue
         }
 
         successCount++
       } catch (err) {
-        console.error('Unexpected error:', err)
         errors.push(`${file.name}: ${err.message}`)
       }
     }
@@ -172,7 +163,7 @@ function FilesPage({ member }) {
       .from('documents')
       .createSignedUrl(file.storage_path, 300)
     if (error) {
-      alert('Could not generate download link. The file may have been moved or deleted.')
+      alert('Could not generate download link.')
       return
     }
     if (data?.signedUrl) window.open(data.signedUrl, '_blank')
@@ -191,7 +182,6 @@ function FilesPage({ member }) {
 
   return (
     <div style={{ maxWidth: '860px' }}>
-      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1 style={{ marginBottom: '0.25rem' }}>Documents & Files</h1>
@@ -211,7 +201,6 @@ function FilesPage({ member }) {
         style={{ display: 'none' }}
         onChange={e => handleUpload(e.target.files)} />
 
-      {/* Upload result message */}
       {uploadMsg && (
         <div className={uploadMsg.startsWith('error:') ? 'alert-error' : 'alert-success'}
           style={{ marginBottom: '1rem' }}
@@ -220,7 +209,6 @@ function FilesPage({ member }) {
         </div>
       )}
 
-      {/* Drop zone */}
       <div
         onDragOver={e => { e.preventDefault(); setDragOver(true) }}
         onDragLeave={() => setDragOver(false)}
@@ -241,14 +229,12 @@ function FilesPage({ member }) {
         </div>
       </div>
 
-      {/* Search */}
       <div style={{ position: 'relative', maxWidth: '360px', marginBottom: '1.5rem' }}>
         <Search size={15} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--ks-text-muted)' }} />
         <input className="field-input" placeholder="Search files…" value={search}
           onChange={e => setSearch(e.target.value)} style={{ paddingLeft: '2.25rem' }} />
       </div>
 
-      {/* File list */}
       {loading ? (
         <p style={{ fontFamily: 'Inter, sans-serif', color: 'var(--ks-text-muted)' }}>Loading…</p>
       ) : filtered.length === 0 ? (
