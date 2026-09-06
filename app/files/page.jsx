@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import withAuth from '@/components/withAuth'
 import { supabase } from '@/lib/supabase'
-import { Upload, Download, Trash2, FileText, File, Search } from 'lucide-react'
+import { Upload, Download, Trash2, FileText, Search } from 'lucide-react'
 
 const FILE_ICONS = {
   'application/pdf': '📄',
@@ -11,8 +11,25 @@ const FILE_ICONS = {
   'application/vnd.ms-excel': '📊',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '📊',
   'text/plain': '📃',
+  'image/jpeg': '🖼️',
+  'image/png': '🖼️',
+  'image/gif': '🖼️',
+  'image/webp': '🖼️',
   default: '📎',
 }
+
+const ALLOWED_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'text/plain',
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+]
 
 function formatSize(bytes) {
   if (!bytes) return '—'
@@ -26,6 +43,7 @@ function FilesPage({ member }) {
   const [files, setFiles] = useState([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
+  const [uploadMsg, setUploadMsg] = useState('')
   const [search, setSearch] = useState('')
   const [deleting, setDeleting] = useState(null)
   const [dragOver, setDragOver] = useState(false)
@@ -35,52 +53,108 @@ function FilesPage({ member }) {
 
   async function loadFiles() {
     setLoading(true)
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('files')
       .select('*, uploader:members!files_uploaded_by_fkey(full_name)')
       .eq('file_type', 'document')
       .order('created_at', { ascending: false })
+    if (error) console.error('Load error:', error)
     setFiles(data || [])
     setLoading(false)
   }
 
   async function handleUpload(fileList) {
-    const allowed = ['application/pdf', 'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'text/plain']
+    setUploadMsg('')
+    const allFiles = Array.from(fileList)
 
-    const validFiles = Array.from(fileList).filter(f => allowed.includes(f.type))
+    // Accept all files — filter out truly unsupported ones
+    // For files with empty type (common on Windows), trust the extension
+    const validFiles = allFiles.filter(f => {
+      if (ALLOWED_TYPES.includes(f.type)) return true
+      // Check by extension if type is missing
+      const ext = f.name.split('.').pop().toLowerCase()
+      return ['pdf','doc','docx','xls','xlsx','txt','jpg','jpeg','png','gif','webp'].includes(ext)
+    })
+
     if (validFiles.length === 0) {
-      alert('Only PDF, Word, Excel, and text files are allowed.')
+      setUploadMsg('error:No supported files found. Allowed: PDF, Word, Excel, images, text.')
       return
     }
 
     setUploading(true)
+    let successCount = 0
+    let errors = []
+
     for (const file of validFiles) {
-      const ext = file.name.split('.').pop()
-      const path = `${member.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`
+      try {
+        const ext = file.name.split('.').pop().toLowerCase()
+        const path = `${member.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`
 
-      const { error: upErr } = await supabase.storage.from('documents').upload(path, file)
-      if (upErr) { console.error('Upload error:', upErr); continue }
+        // Determine mime type from extension if browser didn't provide it
+        const mimeMap = {
+          pdf: 'application/pdf',
+          doc: 'application/msword',
+          docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          xls: 'application/vnd.ms-excel',
+          xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          txt: 'text/plain',
+          jpg: 'image/jpeg', jpeg: 'image/jpeg',
+          png: 'image/png', gif: 'image/gif', webp: 'image/webp',
+        }
+        const mimeType = file.type || mimeMap[ext] || 'application/octet-stream'
 
-      // Get signed URL since bucket is private
-      const { data: { signedUrl } } = await supabase.storage
-        .from('documents')
-        .createSignedUrl(path, 60 * 60 * 24 * 365) // 1 year
+        const { error: upErr } = await supabase.storage
+          .from('documents')
+          .upload(path, file, { contentType: mimeType })
 
-      await supabase.from('files').insert({
-        name: file.name,
-        storage_path: path,
-        url: signedUrl,
-        file_type: 'document',
-        mime_type: file.type,
-        size_bytes: file.size,
-        uploaded_by: member.id,
-      })
+        if (upErr) {
+          console.error('Storage upload error:', upErr)
+          errors.push(`${file.name}: ${upErr.message}`)
+          continue
+        }
+
+        // Get signed URL since bucket is private
+        const { data: signedData, error: signErr } = await supabase.storage
+          .from('documents')
+          .createSignedUrl(path, 60 * 60 * 24 * 365)
+
+        if (signErr) {
+          console.error('Signed URL error:', signErr)
+          errors.push(`${file.name}: Could not create download link`)
+          continue
+        }
+
+        const { error: dbErr } = await supabase.from('files').insert({
+          name: file.name,
+          storage_path: path,
+          url: signedData.signedUrl,
+          file_type: 'document',
+          mime_type: mimeType,
+          size_bytes: file.size,
+          uploaded_by: member.id,
+        })
+
+        if (dbErr) {
+          console.error('DB insert error:', dbErr)
+          errors.push(`${file.name}: ${dbErr.message}`)
+          continue
+        }
+
+        successCount++
+      } catch (err) {
+        console.error('Unexpected error:', err)
+        errors.push(`${file.name}: ${err.message}`)
+      }
     }
+
     setUploading(false)
+
+    if (errors.length > 0) {
+      setUploadMsg(`error:${errors.join(' | ')}`)
+    } else {
+      setUploadMsg(`success:${successCount} file${successCount !== 1 ? 's' : ''} uploaded successfully.`)
+    }
+
     loadFiles()
   }
 
@@ -94,10 +168,13 @@ function FilesPage({ member }) {
   }
 
   async function getDownloadUrl(file) {
-    // Refresh signed URL for download
-    const { data } = await supabase.storage
+    const { data, error } = await supabase.storage
       .from('documents')
-      .createSignedUrl(file.storage_path, 300) // 5 min
+      .createSignedUrl(file.storage_path, 300)
+    if (error) {
+      alert('Could not generate download link. The file may have been moved or deleted.')
+      return
+    }
     if (data?.signedUrl) window.open(data.signedUrl, '_blank')
   }
 
@@ -117,9 +194,9 @@ function FilesPage({ member }) {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ marginBottom: '0.25rem' }}>Documents</h1>
+          <h1 style={{ marginBottom: '0.25rem' }}>Documents & Files</h1>
           <p style={{ color: 'var(--ks-text-muted)', fontFamily: 'Inter, sans-serif', fontSize: '0.9rem' }}>
-            Shared chapter documents and files.
+            Shared chapter documents, images, and files.
           </p>
         </div>
         <button onClick={() => fileRef.current.click()} className="btn-primary"
@@ -130,9 +207,18 @@ function FilesPage({ member }) {
       </div>
 
       <input ref={fileRef} type="file" multiple
-        accept=".pdf,.doc,.docx,.xls,.xlsx,.txt"
+        accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.gif,.webp"
         style={{ display: 'none' }}
         onChange={e => handleUpload(e.target.files)} />
+
+      {/* Upload result message */}
+      {uploadMsg && (
+        <div className={uploadMsg.startsWith('error:') ? 'alert-error' : 'alert-success'}
+          style={{ marginBottom: '1rem' }}
+          onClick={() => setUploadMsg('')}>
+          {uploadMsg.startsWith('error:') ? uploadMsg.slice(6) : uploadMsg.slice(8)}
+        </div>
+      )}
 
       {/* Drop zone */}
       <div
@@ -149,7 +235,10 @@ function FilesPage({ member }) {
           fontFamily: 'Inter, sans-serif', fontSize: '0.85rem', color: 'var(--ks-text-muted)'
         }}>
         <Upload size={18} style={{ color: 'var(--ks-crimson)', marginBottom: '0.35rem' }} />
-        <div>Drop files here or click to upload · PDF, Word, Excel, Text · Max 25MB</div>
+        <div>Drop files here or click to upload</div>
+        <div style={{ fontSize: '0.75rem', marginTop: '0.25rem' }}>
+          PDF, Word, Excel, images (JPG, PNG) · Max 25MB each
+        </div>
       </div>
 
       {/* Search */}
@@ -166,7 +255,7 @@ function FilesPage({ member }) {
         <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
           <FileText size={36} style={{ color: 'var(--ks-border)', marginBottom: '1rem' }} />
           <p style={{ color: 'var(--ks-text-muted)', fontFamily: 'Inter, sans-serif' }}>
-            {search ? 'No files match your search.' : 'No documents uploaded yet.'}
+            {search ? 'No files match your search.' : 'No files uploaded yet.'}
           </p>
         </div>
       ) : (
