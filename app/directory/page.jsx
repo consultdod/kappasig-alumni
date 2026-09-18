@@ -66,7 +66,7 @@ function DirectoryPage({ member: currentMember }) {
         <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
           <Search size={15} style={{ position: 'absolute', left: '0.75rem', top: '50%',
             transform: 'translateY(-50%)', color: 'var(--ks-text-muted)' }} />
-          <input className="field-input" placeholder="Search by name, year, or bio…"
+          <input className="field-input" placeholder="Search by name, year went active, or bio…"
             value={search} onChange={e => setSearch(e.target.value)}
             style={{ paddingLeft: '2.25rem' }} />
         </div>
@@ -84,7 +84,7 @@ function DirectoryPage({ member: currentMember }) {
           onChange={e => setSortBy(e.target.value)}
           style={{ width: 'auto', minWidth: '140px' }}>
           <option value="name">Sort: A–Z</option>
-          <option value="year">Sort: Newest class</option>
+          <option value="year">Sort: Most recent</option>
         </select>
       </div>
 
@@ -92,7 +92,7 @@ function DirectoryPage({ member: currentMember }) {
       {search || filterYear ? (
         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.82rem', color: 'var(--ks-text-muted)', marginBottom: '1rem' }}>
           Showing {filtered.length} of {members.length} members
-          {filterYear && ` · Class of ${filterYear}`}
+          {filterYear && ` · Went Active ${filterYear}`}
         </p>
       ) : null}
 
@@ -165,7 +165,7 @@ function DirectoryPage({ member: currentMember }) {
                       <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.78rem',
                         color: 'var(--ks-text-muted)', marginTop: '0.1rem',
                         display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                        <GraduationCap size={12} /> Class of {m.grad_year}
+                        <GraduationCap size={12} /> Went Active {m.grad_year}
                       </div>
                     )}
                   </div>

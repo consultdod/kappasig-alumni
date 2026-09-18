@@ -120,10 +120,10 @@ function ProfilePage({ member }) {
                   placeholder="(555) 000-0000" />
               </div>
               <div>
-                <label className="field-label">Graduation Year</label>
+                <label className="field-label">Year Went Active</label>
                 <input className="field-input" type="number" value={form.grad_year}
                   onChange={e => setForm(f => ({ ...f, grad_year: e.target.value }))}
-                  placeholder="e.g. 1995" min="1900" max={new Date().getFullYear()} />
+                  placeholder="e.g. 1965" min="1900" max={new Date().getFullYear()} />
               </div>
               <div>
                 <label className="field-label">About me (optional)</label>
@@ -227,3 +227,4 @@ function PrefToggle({ label, hint, checked, onChange }) {
 }
 
 export default withAuth(ProfilePage)
+

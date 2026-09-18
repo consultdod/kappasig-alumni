@@ -81,7 +81,7 @@ function ManageMembersPage({ member: adminMember }) {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: 'var(--ks-fog)', borderBottom: '1px solid var(--ks-border)' }}>
-                {['Name', 'Email', 'Phone', 'Grad Year', 'Role', 'Status', 'Actions'].map(h => (
+                {['Name', 'Email', 'Phone', 'Year Went Active', 'Role', 'Status', 'Actions'].map(h => (
                   <th key={h} style={{
                     padding: '0.75rem 1rem', textAlign: 'left',
                     fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', fontWeight: 600,
@@ -171,3 +171,4 @@ function ManageMembersPage({ member: adminMember }) {
 }
 
 export default withAuth(ManageMembersPage, { adminOnly: true })
+

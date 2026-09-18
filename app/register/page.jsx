@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 export default function RegisterPage() {
   const router = useRouter()
   const [form, setForm] = useState({
-    full_name: '', phone: '', grad_year: '', password: '', confirm: ''
+    full_name: '', phone: '', grad_year: '', password: '', confirm: '', opt_in_member_emails: true
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -51,7 +51,7 @@ export default function RegisterPage() {
         grad_year: form.grad_year || null,
         role: 'member',
         status: 'active',
-        opt_in_member_emails: true,
+        opt_in_member_emails: form.opt_in_member_emails,
         show_phone: true,
       })
 
@@ -109,10 +109,10 @@ export default function RegisterPage() {
                   placeholder="(337) 000-0000" />
               </div>
               <div>
-                <label className="field-label">Graduation year (optional)</label>
+                <label className="field-label">Year Went Active (optional)</label>
                 <input className="field-input" type="number" value={form.grad_year}
                   onChange={e => setForm(f => ({ ...f, grad_year: e.target.value }))}
-                  placeholder="e.g. 1998" min="1900" max={new Date().getFullYear()} />
+                  placeholder="e.g. 1965" min="1900" max={new Date().getFullYear()} />
               </div>
               <div>
                 <label className="field-label">Password</label>
@@ -120,7 +120,21 @@ export default function RegisterPage() {
                   onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
                   required minLength={8} placeholder="Min. 8 characters" />
               </div>
-              <div>
+                            <div style={{ padding: '0.75rem', background: 'var(--ks-fog)', borderRadius: '5px', border: '1px solid var(--ks-border)' }}>
+                <label style={{ display: 'flex', gap: '0.75rem', cursor: 'pointer', alignItems: 'flex-start' }}>
+                  <input type="checkbox" checked={form.opt_in_member_emails}
+                    onChange={e => setForm(f => ({ ...f, opt_in_member_emails: e.target.checked }))}
+                    style={{ accentColor: 'var(--ks-crimson)', width: '16px', height: '16px', marginTop: '2px', flexShrink: 0 }} />
+                  <div>
+                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', fontWeight: 600 }}>
+                      Receive emails from other members
+                    </div>
+                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.775rem', color: 'var(--ks-text-muted)', marginTop: '0.2rem' }}>
+                      Uncheck to only receive emails from administrators. You cannot opt out of administrator emails.
+                    </div>
+                  </div>
+                </label>
+              </div><div>
                 <label className="field-label">Confirm password</label>
                 <input className="field-input" type="password" value={form.confirm}
                   onChange={e => setForm(f => ({ ...f, confirm: e.target.value }))}
@@ -137,3 +151,4 @@ export default function RegisterPage() {
     </div>
   )
 }
+

@@ -44,7 +44,7 @@ const FIELD_MAP = {
   // phone aliases
   phone: 'phone', mobile: 'phone', cell: 'phone', mobile_number: 'phone',
   phone_number: 'phone', cell_phone: 'phone',
-  // grad year aliases
+  // Year Went Active aliases
   grad_year: 'grad_year', graduation_year: 'grad_year', class_year: 'grad_year',
   year: 'grad_year', graduation: 'grad_year', class: 'grad_year',
   // bio aliases
@@ -66,7 +66,7 @@ function validateRow(row, index) {
   if (!row.email) errors.push('Email is required')
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(row.email)) errors.push('Email is invalid')
   if (row.grad_year && (isNaN(row.grad_year) || row.grad_year < 1900 || row.grad_year > new Date().getFullYear()))
-    errors.push('Grad year must be a valid 4-digit year')
+    errors.push('Year Went Active must be a valid 4-digit year')
   return errors
 }
 
@@ -252,7 +252,7 @@ function ImportMembersPage() {
                   ['Full Name', 'Yes', 'full_name, name, member_name'],
                   ['Email', 'Yes', 'email, email_address, e_mail'],
                   ['Phone', 'No', 'phone, mobile, cell, phone_number, mobile_number, cell_phone'],
-                  ['Grad Year', 'No', 'grad_year, graduation_year, class_year, year, class'],
+                  ['Year Went Active', 'No', 'grad_year, graduation_year, class_year, year, class'],
                   ['Bio / Notes', 'No', 'bio, about, notes'],
                 ].map(([field, req, cols], i) => (
                   <tr key={field} style={{ background: i % 2 === 0 ? 'white' : 'var(--ks-fog)' }}>
@@ -311,7 +311,7 @@ function ImportMembersPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '680px' }}>
               <thead>
                 <tr style={{ background: 'var(--ks-fog)', borderBottom: '1px solid var(--ks-border)' }}>
-                  {['', 'Full Name', 'Email', 'Phone', 'Grad Year', 'Bio', 'Status'].map(h => (
+                  {['', 'Full Name', 'Email', 'Phone', 'Year Went Active', 'Bio', 'Status'].map(h => (
                     <th key={h} style={{
                       padding: '0.6rem 0.75rem', textAlign: 'left',
                       fontFamily: 'Inter, sans-serif', fontSize: '0.73rem', fontWeight: 600,
@@ -491,3 +491,4 @@ function ImportMembersPage() {
 }
 
 export default withAuth(ImportMembersPage, { adminOnly: true })
+
