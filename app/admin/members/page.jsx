@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react'
 import withAuth from '@/components/withAuth'
 import { supabase } from '@/lib/supabase'
-import { Search, UserCheck, UserX, Shield, User } from 'lucide-react'
+import { Search, UserCheck, UserX, Shield, User, Pencil } from 'lucide-react'
+import Link from 'next/link'
 
 function ManageMembersPage({ member: adminMember }) {
   const [members, setMembers] = useState([])
