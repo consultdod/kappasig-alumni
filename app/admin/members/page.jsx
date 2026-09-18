@@ -31,7 +31,7 @@ function ManageMembersPage({ member: adminMember }) {
   }
 
   async function toggleRole(m) {
-    if (m.id === adminMember.id) return // Can't change own role
+    if (m.id === adminMember.id) return
     const newRole = m.role === 'admin' ? 'member' : 'admin'
     await supabase.from('members').update({ role: newRole }).eq('id', m.id)
     setActionMsg(`${m.full_name} is now a${newRole === 'admin' ? 'n admin' : ' member'}.`)
@@ -60,7 +60,6 @@ function ManageMembersPage({ member: adminMember }) {
         </div>
       )}
 
-      {/* Search */}
       <div style={{ position: 'relative', maxWidth: '360px', marginBottom: '1.5rem' }}>
         <Search size={15} style={{
           position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)',
@@ -124,6 +123,18 @@ function ManageMembersPage({ member: adminMember }) {
                   </td>
                   <td style={{ padding: '0.75rem 1rem' }}>
                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <Link
+                        href={`/admin/members/${m.id}`}
+                        style={{
+                          padding: '0.3rem 0.6rem', border: '1px solid var(--ks-crimson)',
+                          borderRadius: '4px', background: 'white', cursor: 'pointer',
+                          fontFamily: 'Inter, sans-serif', fontSize: '0.75rem',
+                          display: 'flex', alignItems: 'center', gap: '0.3rem',
+                          color: 'var(--ks-crimson)', textDecoration: 'none'
+                        }}
+                      >
+                        <Pencil size={12} /> Edit
+                      </Link>
                       <button
                         onClick={() => toggleStatus(m)}
                         title={m.status === 'active' ? 'Deactivate' : 'Activate'}
@@ -172,4 +183,3 @@ function ManageMembersPage({ member: adminMember }) {
 }
 
 export default withAuth(ManageMembersPage, { adminOnly: true })
-
